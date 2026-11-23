@@ -29,14 +29,21 @@ def validate(text):
 
 
 def main():
-    validate(JOKE)
+    content = JOKE + "\n"
+    validate(content.rstrip("\n"))
+    if len(content) > MAX_CHARS + 1:
+        raise ValueError("entry file exceeds %d characters" % (MAX_CHARS + 1))
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
     os.makedirs(out_dir, exist_ok=True)
     target = os.path.join(out_dir, "entry.txt")
     tmp = target + ".tmp"
     with open(tmp, "w", encoding="utf-8", newline="\n") as f:
-        f.write(JOKE + "\n")
+        f.write(content)
     os.replace(tmp, target)
+    # Verify what actually landed on disk round-trips exactly.
+    with open(target, "r", encoding="utf-8", newline="") as f:
+        if f.read() != content:
+            raise ValueError("entry.txt does not match the validated content")
     return 0
 
 
